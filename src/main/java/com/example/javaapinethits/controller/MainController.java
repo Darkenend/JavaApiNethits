@@ -21,7 +21,6 @@ public class MainController {
             @RequestParam String token,
             @RequestParam String name,
             @RequestParam String phone) {
-
         return "Saved";
     }
 
@@ -29,7 +28,6 @@ public class MainController {
     public @ResponseBody String readAllCustomers(
             @RequestParam String token
             ) {
-
         return "All Clients";
     }
 
