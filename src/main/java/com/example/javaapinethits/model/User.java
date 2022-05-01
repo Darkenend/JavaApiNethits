@@ -16,7 +16,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
     private String username;
-    private String password;
+    private String hashed_password;
     private String token;
     private Date token_expiration;
 
@@ -48,11 +48,11 @@ public class User {
     }
 
     public String getPassword() {
-        return password;
+        return hashed_password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPassword(String hashed_password) {
+        this.hashed_password = hashed_password;
     }
 
     public String getToken() {

@@ -4,6 +4,7 @@ import com.example.javaapinethits.model.Customer;
 import com.example.javaapinethits.model.User;
 import com.example.javaapinethits.repository.CustomerRepository;
 import com.example.javaapinethits.repository.UserRepository;
+import com.example.javaapinethits.utilities.JSON;
 import com.example.javaapinethits.utilities.Password;
 import com.example.javaapinethits.utilities.Token;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 
 @RestController
 public class MainController {
@@ -27,26 +29,30 @@ public class MainController {
             @RequestParam String token,
             @RequestParam String name,
             @RequestParam String phone) {
+        tokenInput(token);
         Customer c = new Customer();
         c.setName(name);
         c.setPhone(phone);
         customerRepository.save(c);
-        return "Saved";
+        return JSON.toJSON(c);
     }
 
-    @GetMapping(path="/customer/")
+    @GetMapping(path="/customer")
     public @ResponseBody String readAllCustomers(
             @RequestParam String token
             ) {
-        return "All Clients";
+        tokenInput(token);
+        List<Customer> customers = (List<Customer>) customerRepository.findAll();
+        return JSON.toJSON(customers);
     }
 
     @GetMapping(path="/customer/{id}")
     public @ResponseBody String readCustomer(
             @RequestParam String token,
-            @RequestParam int id
-    ) {
-        return "Client with ID:"+id;
+            @PathVariable int id) {
+        tokenInput(token);
+        Customer c = customerRepository.findById(id).get();
+        return JSON.toJSON(c);
     }
 
     @PostMapping(path="/login")
@@ -61,7 +67,7 @@ public class MainController {
         u.setToken(token);
         u.setToken_expiration();
         userRepository.save(u);
-        return toJSON(u);
+        return JSON.toJSON(u);
     }
 
     @PutMapping(path = "/customer")
@@ -71,7 +77,12 @@ public class MainController {
             @RequestParam String name,
             @RequestParam String phone
     ) {
-        return "Client Modified";
+        tokenInput(token);
+        Customer c = customerRepository.findById(id).get();
+        c.setName(name);
+        c.setPhone(phone);
+        customerRepository.save(c);
+        return JSON.toJSON(c);
     }
 
     @DeleteMapping(path = "/customer")
@@ -79,12 +90,10 @@ public class MainController {
             @RequestParam String token,
             @RequestParam int id
     ) {
-        return "Client Deleted";
-    }
-
-    @GetMapping(path = "/darkenend")
-    public @ResponseBody String testing() {
-        return "Test Connection?";
+        tokenInput(token);
+        Customer c = customerRepository.findById(id).get();
+        customerRepository.delete(c);
+        return JSON.toJSON(c);
     }
 
     private String handlePasswordGeneration(String password) {
@@ -97,21 +106,8 @@ public class MainController {
         return passwordHashed;
     }
 
-    private String toJSON(@NotNull User u) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(u);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private String toJSON(@NotNull Customer c) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(c);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    private void tokenInput(String token) {
+        List<User> users = (List<User>) userRepository.findAll();
+        Token.validateToken(token, users);
     }
 }
