@@ -10,6 +10,12 @@ import java.util.List;
 import java.util.Objects;
 
 public class Token {
+    /**
+     * Validates the token according to the users in the database
+     * @param token The token to validate
+     * @param users The users in the database
+     * @return If the token is valid, or throws a ResponseStatusException if not
+     */
     public static boolean validateToken(
             String token,
             List<User> users) {
@@ -30,11 +36,19 @@ public class Token {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
 
+    /**
+     * Generates a new token based on the REGEX pattern
+     * @return The new token
+     */
     public static String generateToken() {
         RgxGen rgxGen = new RgxGen(getPattern());
         return rgxGen.generate();
     }
 
+    /**
+     * Gets the REGEX pattern for the token
+     * @return The REGEX pattern
+     */
     public static String getPattern() {
         return "^[0-9a-zA-Z]{16}$";
     }

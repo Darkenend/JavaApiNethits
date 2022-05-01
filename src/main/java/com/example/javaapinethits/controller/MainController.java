@@ -93,6 +93,11 @@ public class MainController {
         return JSON.toJSON(c);
     }
 
+    /**
+     * This method is used to handle the password generation from the user's input.
+     * @param password The user's input password.
+     * @return The hashed password.
+     */
     private String handlePasswordGeneration(String password) {
         String passwordHashed = "";
         try {
@@ -103,6 +108,10 @@ public class MainController {
         return passwordHashed;
     }
 
+    /**
+     * This method is used to check if the token is valid, calling from here the validateToken method in the Token class.
+     * @param token The token to be checked.
+     */
     private void tokenInput(String token) {
         List<User> users = (List<User>) userRepository.findAll();
         Token.validateToken(token, users);

@@ -9,6 +9,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class JSON {
+    /**
+     * Converts to a JSON string the User object.
+     * @param u The User object to convert.
+     * @return The JSON string.
+     */
     public static String toJSON(@NotNull User u) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -18,6 +23,11 @@ public class JSON {
         }
     }
 
+    /**
+     * Converts to a JSON string the Customer object.
+     * @param c The Customer object to convert.
+     * @return The JSON string.
+     */
     public static String toJSON(@NotNull Customer c) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -27,6 +37,11 @@ public class JSON {
         }
     }
 
+    /**
+     * Converts to a JSON string the list of Customer objects.
+     * @param cl The list of Customer objects to convert.
+     * @return The JSON string.
+     */
     public static String toJSON(@NotNull List<Customer> cl) {
         ObjectMapper mapper = new ObjectMapper();
         StringBuilder json = new StringBuilder();

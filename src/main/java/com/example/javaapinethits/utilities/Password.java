@@ -8,6 +8,13 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 
 public class Password {
+    /**
+     * Hashes the given password with PBKDF2WithHmacSHA1 algorithm.
+     * @param passwordToHash The password to hash.
+     * @return The hashed password.
+     * @throws NoSuchAlgorithmException If the PBKDF2WithHmacSHA1 algorithm is not available.
+     * @throws InvalidKeySpecException If the password is too long.
+     */
     public static String generatePassword(String passwordToHash) throws NoSuchAlgorithmException, InvalidKeySpecException {
         int iterations = 777;
         char[] chars = passwordToHash.toCharArray();
@@ -20,6 +27,14 @@ public class Password {
         return iterations+":"+toHex(salt)+":"+toHex(hash);
     }
 
+    /**
+     * Checks if the given password is correct.
+     * @param originalPassword The password to check.
+     * @param storedPassword The stored password.
+     * @return True if the password is correct, false otherwise.
+     * @throws NoSuchAlgorithmException If the PBKDF2WithHmacSHA1 algorithm is not available.
+     * @throws InvalidKeySpecException If the password is too long.
+     */
     public static boolean validatePassword(String originalPassword, String storedPassword) throws NoSuchAlgorithmException, InvalidKeySpecException {
         try {
             String[] parts = storedPassword.split(":");
@@ -44,6 +59,12 @@ public class Password {
         }
     }
 
+
+    /**
+     * Generates a Salt for the Password.
+     * @return The generated Salt.
+     * @throws NoSuchAlgorithmException If the SHA1PRNG algorithm is not available.
+     */
     private static byte[] getSalt() throws NoSuchAlgorithmException {
         SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
         byte[] salt = new byte[16];
@@ -51,6 +72,11 @@ public class Password {
         return salt;
     }
 
+    /**
+     * Converts a byte array to a hex string.
+     * @param array The byte array to convert.
+     * @return The hex string.
+     */
     private static String toHex(byte[] array) {
         BigInteger bi = new BigInteger(1, array);
         String hex = bi.toString(16);
@@ -62,6 +88,11 @@ public class Password {
         }
     }
 
+    /**
+     * Converts a hex string to a byte array.
+     * @param hex The hex string.
+     * @return The byte array.
+     */
     private static byte[] fromHex(String hex) {
         byte[] bytes = new byte[hex.length() / 2];
         for (int i = 0; i < bytes.length; i++) {
