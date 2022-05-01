@@ -13,6 +13,21 @@ public class Customer {
     private String name;
     private String phone;
 
+    public Customer(int id, String name, String phone) {
+        setId(id);
+        setName(name);
+        setPhone(phone);
+    }
+
+    public Customer() {
+        setName("");
+        setPhone("");
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public Integer getId() {
         return id;
     }

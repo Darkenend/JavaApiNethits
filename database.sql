@@ -17,7 +17,7 @@ create table if not exists nethitsdb.user
     constraint `PRIMARY`
     primary key,
     username         varchar(16)                                 not null,
-    hashed_password  varchar(64)                                 not null,
+    hashed_password  varchar(256)                                not null,
     token            varchar(256)                                null,
     token_expiration datetime default ((now() + interval 1 day)) null,
     constraint table_name_id_uindex
