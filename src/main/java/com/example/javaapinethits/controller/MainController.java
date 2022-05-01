@@ -7,9 +7,6 @@ import com.example.javaapinethits.repository.UserRepository;
 import com.example.javaapinethits.utilities.JSON;
 import com.example.javaapinethits.utilities.Password;
 import com.example.javaapinethits.utilities.Token;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,7 +56,7 @@ public class MainController {
     public @ResponseBody String login(
             @RequestParam String username,
             @RequestParam String password
-    ) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    ) {
         User u = new User();
         String token = Token.generateToken();
         u.setUsername(username);
