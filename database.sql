@@ -23,7 +23,5 @@ create table if not exists nethitsdb.user
     constraint table_name_id_uindex
     unique (id),
     constraint table_name_token_uindex
-    unique (token),
-    constraint table_name_username_uindex
-    unique (username)
+    unique (token)
     );

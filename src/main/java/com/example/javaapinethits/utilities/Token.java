@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class Token {
+    private static final String PATTERN = "^[a-zA-Z0-9]{16}$";
+
     /**
      * Validates the token according to the users in the database
      * @param token The token to validate
@@ -18,20 +20,19 @@ public class Token {
      */
     public static boolean validateToken(
             String token,
-            List<User> users) {
+            List<User> users
+    ) {
         boolean isValid = false;
-        if (!token.matches(getPattern())) {
+        token = getTokenFromRequest(token);
+        if (!token.matches(getPattern()))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
         Date now = new Date();
         for (User user : users) {
-            if (Objects.equals(user.getToken(), token)) {
-                if (user.getToken_expiration().after(now)) {
+            if (Objects.equals(user.getToken(), token))
+                if (user.getToken_expiration().after(now))
                     return true;
-                } else {
+                else
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-                }
-            }
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     }
@@ -50,6 +51,21 @@ public class Token {
      * @return The REGEX pattern
      */
     public static String getPattern() {
-        return "^[0-9a-zA-Z]{16}$";
+        return PATTERN;
+    }
+
+    private static String getTokenFromRequest(String token) {
+        if (token.matches(getPattern()))
+            return token;
+        token = token.replace("\n", "");
+        token = token.replace("\r", "");
+        token = token.replace("\t", "");
+        token = token.replace("{", "");
+        token = token.replace("}", "");
+        token = token.replace("\"token\"", "");
+        token = token.replace(":", "");
+        token = token.replace("\"", "");
+        token = token.replace(" ", "");
+        return token;
     }
 }

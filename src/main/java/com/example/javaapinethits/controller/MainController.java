@@ -1,5 +1,6 @@
 package com.example.javaapinethits.controller;
 
+import com.example.javaapinethits.CustomRequests.*;
 import com.example.javaapinethits.model.Customer;
 import com.example.javaapinethits.model.User;
 import com.example.javaapinethits.repository.CustomerRepository;
@@ -8,7 +9,9 @@ import com.example.javaapinethits.utilities.JSON;
 import com.example.javaapinethits.utilities.Password;
 import com.example.javaapinethits.utilities.Token;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -23,20 +26,20 @@ public class MainController {
 
     @PostMapping(path="/customer")
     public @ResponseBody String addNewCustomer (
-            @RequestParam String token,
-            @RequestParam String name,
-            @RequestParam String phone) {
-        tokenInput(token);
+            @RequestBody NewCustomerRequest newCustomerRequest
+    ) {
+        checkRequestValidity(newCustomerRequest);
+        tokenInput(newCustomerRequest.getToken());
         Customer c = new Customer();
-        c.setName(name);
-        c.setPhone(phone);
+        c.setName(newCustomerRequest.getName());
+        c.setPhone(newCustomerRequest.getPhone());
         customerRepository.save(c);
         return JSON.toJSON(c);
     }
 
     @GetMapping(path="/customer")
-    public @ResponseBody String readAllCustomers(
-            @RequestParam String token
+    public @ResponseBody String readAllCustomers (
+            @RequestBody String token
             ) {
         tokenInput(token);
         List<Customer> customers = (List<Customer>) customerRepository.findAll();
@@ -44,8 +47,8 @@ public class MainController {
     }
 
     @GetMapping(path="/customer/{id}")
-    public @ResponseBody String readCustomer(
-            @RequestParam String token,
+    public @ResponseBody String readCustomer (
+            @RequestBody String token,
             @PathVariable int id) {
         tokenInput(token);
         Customer c = customerRepository.findById(id).get();
@@ -53,14 +56,14 @@ public class MainController {
     }
 
     @PostMapping(path="/login")
-    public @ResponseBody String login(
-            @RequestParam String username,
-            @RequestParam String password
-    ) {
+    public @ResponseBody String login (
+            @RequestBody LoginRequest loginRequest
+            ) {
+        checkRequestValidity(loginRequest);
         User u = new User();
         String token = Token.generateToken();
-        u.setUsername(username);
-        u.setPassword(handlePasswordGeneration(password));
+        u.setUsername(loginRequest.getUsername());
+        u.setPassword(handlePasswordGeneration(loginRequest.getPassword()));
         u.setToken(token);
         u.setToken_expiration();
         userRepository.save(u);
@@ -68,27 +71,25 @@ public class MainController {
     }
 
     @PutMapping(path = "/customer")
-    public @ResponseBody String modifyCustomer(
-            @RequestParam String token,
-            @RequestParam int id,
-            @RequestParam String name,
-            @RequestParam String phone
-    ) {
-        tokenInput(token);
-        Customer c = customerRepository.findById(id).get();
-        c.setName(name);
-        c.setPhone(phone);
+    public @ResponseBody String modifyCustomer (
+            @RequestBody PatchCustomerRequest patchCustomerRequest
+            ) {
+        checkRequestValidity(patchCustomerRequest);
+        tokenInput(patchCustomerRequest.getToken());
+        Customer c = customerRepository.findById(patchCustomerRequest.getId()).get();
+        c.setName(patchCustomerRequest.getName());
+        c.setPhone(patchCustomerRequest.getPhone());
         customerRepository.save(c);
         return JSON.toJSON(c);
     }
 
     @DeleteMapping(path = "/customer")
-    public @ResponseBody String deleteCustomer(
-            @RequestParam String token,
-            @RequestParam int id
-    ) {
-        tokenInput(token);
-        Customer c = customerRepository.findById(id).get();
+    public @ResponseBody String deleteCustomer (
+            @RequestBody DeleteCustomerRequest deleteCustomerRequest
+            ) {
+        checkRequestValidity(deleteCustomerRequest);
+        tokenInput(deleteCustomerRequest.getToken());
+        Customer c = customerRepository.findById(deleteCustomerRequest.getId()).get();
         customerRepository.delete(c);
         return JSON.toJSON(c);
     }
@@ -98,7 +99,9 @@ public class MainController {
      * @param password The user's input password.
      * @return The hashed password.
      */
-    private String handlePasswordGeneration(String password) {
+    private String handlePasswordGeneration (
+            String password
+    ) {
         String passwordHashed = "";
         try {
             passwordHashed = Password.generatePassword(password);
@@ -112,8 +115,17 @@ public class MainController {
      * This method is used to check if the token is valid, calling from here the validateToken method in the Token class.
      * @param token The token to be checked.
      */
-    private void tokenInput(String token) {
+    private void tokenInput (
+            String token
+    ) {
         List<User> users = (List<User>) userRepository.findAll();
         Token.validateToken(token, users);
+    }
+
+    private void checkRequestValidity (CustomRequest customRequest) {
+        CustomRequestValidity crv = customRequest.isValidCustomRequest();
+        if (!crv.isValid()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, crv.getMessage());
+        }
     }
 }
